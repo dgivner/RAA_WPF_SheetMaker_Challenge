@@ -1,22 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.Exceptions;
-using Autodesk.Revit.UI;
 using Microsoft.Win32;
 
 
@@ -27,13 +15,10 @@ namespace RAA_WPF_SheetMaker_Challenge
     /// </summary>
     public partial class MyForm : Window
     {
-        
+        private List<dSheets> sheetDataList;
         private string sheetNumber;
         private string sheetName;
         private bool isPlaceholder;
-        
-        private List<ViewPlan> viewPlanList;
-        private List<string> tBlockNames;
         private Document doc;
         private ElementId tblockId;
 
@@ -49,19 +34,20 @@ namespace RAA_WPF_SheetMaker_Challenge
         public MyForm(Document doc, List<DataClass1> dataList)
         {
             InitializeComponent();
+            DataList = new ObservableCollection<DataClass1>();
+            DataContext = this;
             DataGrid.ItemsSource = dataList;
             //DataGrid.ItemsSource = GetData();
-            //dataList = new ObservableCollection<DataClass1>();
+            
             SheetNumberItems = new ObservableCollection<string>();
             //SheetNumberItem = sheetNumber;
-            
+
             SheetNameItems = new ObservableCollection<string>();
             //SheetNameItem = sheetName;
-            
+
             IsPlaceholder = new ObservableCollection<bool>();
 
             TitleBlockItems = new ObservableCollection<string>(GetTitleBlocksByName(doc));
-            
             TitleBlockItem.ItemsSource = TitleBlockItems;
 
 
@@ -79,8 +65,8 @@ namespace RAA_WPF_SheetMaker_Challenge
             foreach (Element titleBlock in tBlocks)
             {
                 Parameter parameter = titleBlock.get_Parameter(BuiltInParameter.ALL_MODEL_TYPE_NAME);
-                if(parameter != null && parameter.HasValue)
-                tBlockNames.Add(parameter.AsString());
+                if (parameter != null && parameter.HasValue)
+                    tBlockNames.Add(parameter.AsString());
             }
             return tBlockNames;
         }
@@ -102,15 +88,13 @@ namespace RAA_WPF_SheetMaker_Challenge
         private void btnLoad_Click(object sender, RoutedEventArgs e)
         {
             string sheetPath = OpenFile();
-            //var fileName = OpenFile();
-            //Read Sheets excel file for data
-            List<dSheets> sheetDataList = new List<dSheets>();
+
+            sheetDataList = new List<dSheets>();
 
             string[] sheetArray = File.ReadAllLines(sheetPath);
-
-            foreach (string sheetString in sheetArray)
+            for (int i = 1; i < sheetArray.Length; i++)
             {
-                string[] cellData = sheetString.Split(',');
+                string[] cellData = sheetArray[i].Split(',');
 
                 dSheets curSheetData = new dSheets();
                 curSheetData.Number = cellData[0];
@@ -118,54 +102,54 @@ namespace RAA_WPF_SheetMaker_Challenge
 
                 sheetDataList.Add(curSheetData);
             }
-            sheetDataList.RemoveAt(0);
-            this.Close();
+            foreach (dSheets sheet in sheetDataList)
+            {
+                DataList.Add(new DataClass1(sheet.Number, sheet.Name, false, null, null));
+            }
+            GetData();
+            DataGrid.ItemsSource = DataList;
+            //this.Close();
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
-            DataList.Add(new DataClass1(sheetNumber,sheetName,isPlaceholder,tBlockNames,viewPlanList));
+            DataList.Add(new DataClass1(sheetNumber,sheetName,false,null,null));
         }
 
         private void btnRemove_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (DataGrid.SelectedItem != null)
             {
-                foreach (DataClass1 curRow in DataList)
-                {
-                    if (DataGrid.SelectedItem == curRow)
-                        DataList.Remove(curRow);
-                }
+                DataList.Remove(DataGrid.SelectedItem as DataClass1);
             }
-            catch (Exception)
-            { }
-            
+
         }
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
         {
-            //using (Transaction tx = new Transaction(doc))
-            //{
-            //    tx.Start("Sheet Maker");
-            //    foreach (DataClass1 curRow in DataList)
-            //    {
-            //        ViewSheet newSheet = ViewSheet.Create((doc, tblockId));
+            //todo Process data and close form
+            using (Transaction tx = new Transaction(doc))
+            {
+                tx.Start("Sheet Maker");
+                foreach (DataClass1 curRow in DataList)
+                {
+                    ViewSheet newSheet = ViewSheet.Create(doc, tblockId);
 
-            //        XYZ insertPoint = new XYZ(2, 1, 0);
-            //        XYZ secondInsertPoint = new XYZ(0, 1, 0);
+                    //XYZ insertPoint = new XYZ(2, 1, 0);
+                    //XYZ secondInsertPoint = new XYZ(0, 1, 0);
 
-            //        Viewport newViewport = Viewport.Create((doc, newSheet.Id, View.Id, insertPoint));
-            //    }
-            //    foreach (var sheet in GetData())
-            //    {
-            //        ViewSheet newSheet = ViewSheet.Create(doc, tblockId);
-            //        newSheet.Name = sheet.Name;
-            //        newSheet.SheetNumber = sheet.Number;
-            //    }
-            //    tx.Commit();
-            //    tx.Dispose();
-            //}
-            
+                    //Viewport newViewport = Viewport.Create((doc, newSheet.Id, selectedView.Id, insertPoint));
+                }
+                foreach (var sheet in GetData())
+                {
+                    ViewSheet newSheet = ViewSheet.Create(doc, tblockId);
+                    newSheet.Name = sheet.Name;
+                    newSheet.SheetNumber = sheet.Number;
+                }
+                tx.Commit();
+                tx.Dispose();
+            }
+
             this.DialogResult = true;
             this.Close();
         }
@@ -178,68 +162,68 @@ namespace RAA_WPF_SheetMaker_Challenge
 
         public List<DataClass1> GetData()
         {
-            List<dSheets> SheetList()
-            {
-                string sheetsFilePath = OpenFile();
-
-                List<dSheets> sheets = new List<dSheets>();
-                string[] sheetsArray = File.ReadAllLines(sheetsFilePath);
-                foreach (var sheetsRowString in sheetsArray)
-                {
-                    string[] sheetsCellString = sheetsRowString.Split(',');
-                    var sheet = new dSheets
-                    {
-                        Number = sheetsCellString[0],
-                        Name = sheetsCellString[1]
-                    };
-
-                    sheets.Add(sheet);
-                }
-
-                return sheets;
-            }
+            SheetNumberItems.Add(sheetNumber);
+            SheetNameItems.Add(sheetName);
             return DataList.ToList();
+        }
+
+        private static List<dSheets> SheetList()
+        {
+            string sheetsFilePath = OpenFile();
+
+            List<dSheets> sheets = new List<dSheets>();
+            string[] sheetsArray = File.ReadAllLines(sheetsFilePath);
+            foreach (var sheetsRowString in sheetsArray)
+            {
+                string[] sheetsCellString = sheetsRowString.Split(',');
+                var sheet = new dSheets
+                {
+                    Number = sheetsCellString[0],
+                    Name = sheetsCellString[1]
+                };
+
+                sheets.Add(sheet);
+            }
+
+            return sheets;
         }
 
         private static string OpenFile()
         {
-            OpenFileDialog selectFile = new OpenFileDialog();
-            selectFile.InitialDirectory = "C:\\";
-            selectFile.Filter = "Excel|*.xlsx";
-            selectFile.Multiselect = false;
-
-            string fileName = "";
-            if ((bool)selectFile.ShowDialog())
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+            if (openFileDialog.ShowDialog() == true)
             {
-                fileName = selectFile.FileName;
+                return openFileDialog.FileName;
             }
-
-            return fileName;
+            return null;
         }
 
+        private void LoadDataFromSource()
+        {
+            
+        }
     }
     public class DataClass1
     {
-
         //Defining the properties for the DataGrid - container for data
         public string SheetNumber { get; set; }
         public string SheetName { get; set; }
         public bool IsPlaceholder { get; set; }
-        public List<string> TitleBlockList { get; set; }
         public List<ViewPlan> ViewPlanList { get; set; }
+        public ElementId TBlockId { get; set; }
         public string Name { get; internal set; }
         public string Number { get; internal set; }
 
-        public DataClass1(string sheetNumber, string sheetName, bool isPlaceholder, List<string> titleBlockList,
-            List<ViewPlan> viewPlanList)
+        public DataClass1(string sheetNumber, string sheetName, bool isPlaceholder, 
+            List<ViewPlan> viewPlanList, ElementId tBlockId)
         {
             SheetNumber = sheetNumber;
             SheetName = sheetName;
             IsPlaceholder = isPlaceholder;
-            TitleBlockList = titleBlockList;
             ViewPlanList = viewPlanList;
+            TBlockId = tBlockId;
         }
-
     }
     
 }

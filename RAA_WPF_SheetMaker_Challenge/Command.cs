@@ -18,9 +18,8 @@ namespace RAA_WPF_SheetMaker_Challenge
     {
         private string sheetNumber;
         private string sheetName;
-        string tblockTypeName;
         private List<ViewPlan> viewPlanList;
-        private List<string> tBlockNames;
+        private ElementId tBlockId;
 
         public Result Execute(
           ExternalCommandData commandData,
@@ -34,10 +33,10 @@ namespace RAA_WPF_SheetMaker_Challenge
 
             // put any code needed for the form here
             List<DataClass1> dataList = new List<DataClass1>();
-            dataList.Add(new DataClass1(sheetNumber,sheetName,true, tBlockNames, viewPlanList));
+            dataList.Add(new DataClass1(sheetNumber,sheetName,false, viewPlanList, tBlockId));
 
             List<string> viewNames = MyForm.GetViewPlansByName(doc);
-            //List<Element> tBlockNames = MyForm.GetTitleBlocksByName(doc, tBlockNames);
+            List<string> tBlockNames = MyForm.GetTitleBlocksByName(doc);
 
             // open form
             MyForm currentForm = new MyForm(doc, dataList)
@@ -50,16 +49,7 @@ namespace RAA_WPF_SheetMaker_Challenge
 
             currentForm.ShowDialog();
 
-            //if (currentForm.DialogResult == true)
-            //{
-            //    List<DataClass1> dataList = currentForm.GetData();
-
-            //    foreach (DataClass1 curClass1 in dataList)
-            //    {
-            //        TaskDialog.Show("Titleblocks", curClass1.TitleBlockList.ToString());
-            //        TaskDialog.Show("Views", curClass1.ViewPlanList.ToString());
-            //    }
-            //}
+            
             // get form data and do something
 
             return Result.Succeeded;
