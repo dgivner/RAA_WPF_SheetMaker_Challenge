@@ -1,0 +1,49 @@
+﻿<Window x:Class="RAA_WPF_SheetMaker_Challenge.MyForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RAA_WPF_SheetMaker_Challenge"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Content="Sheet Maker" FontWeight="Bold" FontSize="34" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Label Grid.Row="1" Content="Enter Sheet Information Below:"/>
+
+
+        <DataGrid x:Name="DataGrid" Grid.Row="2" 
+                  GridLinesVisibility="All" 
+                  AlternatingRowBackground="AliceBlue"
+                  CanUserAddRows="True" 
+                  CanUserReorderColumns="True"
+                  SelectionMode="Extended" 
+                  AutoGenerateColumns="False" 
+                  EnableColumnVirtualization="False" 
+                  EnableRowVirtualization="False" SelectionChanged="dataGrid_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="SheetNumberItem" Header="Sheet Number" Width="100" IsReadOnly="False" Binding="{Binding SheetNumber }"/>
+                <DataGridTextColumn x:Name="SheetNameItem" Header="Sheet Name" Width="300" IsReadOnly="False" Binding="{Binding SheetName}"/>
+                <DataGridCheckBoxColumn Header="Is Placeholder?" Width="90" IsReadOnly="False"  Binding="{Binding IsPlaceholder}"/>
+                <DataGridComboBoxColumn x:Name="TitleBlockItem" Header="Titleblock" IsReadOnly="False" Width="100" SelectedItemBinding="{Binding TitleBlockList}" />
+                <DataGridComboBoxColumn x:Name="ViewItem" Header="View to Place on Sheet" Width="*" IsReadOnly="False" SelectedItemBinding="{Binding ViewToPlace}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="BtnOk" Content="OK" Grid.Row="3" Width="90" Height="30" Margin="0,0,10,0" Click="btnOK_Click"/>
+            <Button x:Name="BtnCancel" Content="Cancel" Width="90" Height="30" Margin="10,0,0,0" Click="btnCancel_Click"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Button x:Name="BtnAdd" Content="+" Width="30" Height="30" Margin="0,0,10,0" Click="btnAdd_Click"/>
+            <Button x:Name="BtnRemove" Content="-" Width="30" Height="30" Margin="10,0,0,0" Click="btnRemove_Click"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="BtnLoad" Content="Load Excel" Width="120" Height="30" Click="btnLoad_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

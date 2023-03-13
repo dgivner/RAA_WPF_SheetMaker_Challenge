@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Command RAA_WPF_SheetMaker_Challenge</Text>
+    <Description>Some description for RAA_WPF_SheetMaker_Challenge</Description>
+    <Assembly>RAA_WPF_SheetMaker_Challenge.dll</Assembly>
+    <FullClassName>RAA_WPF_SheetMaker_Challenge.Command</FullClassName>
+    <ClientId>e51f8133-e283-43a3-9542-9d5e69b44f40</ClientId>
+    <VendorId>com.YOUR COMPANY NAME</VendorId>
+    <VendorDescription>YOUR COMPANY NAME, YOUR COMPANY URL</VendorDescription>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>Application RAA_WPF_SheetMaker_Challenge</Name>
+    <Assembly>RAA_WPF_SheetMaker_Challenge.dll</Assembly>
+    <FullClassName>RAA_WPF_SheetMaker_Challenge.App</FullClassName>
+    <ClientId>e1f9fcd4-8040-4f57-9405-375e4072a20f</ClientId>
+    <VendorId>com.YOUR COMPANY NAME</VendorId>
+    <VendorDescription>YOUR COMPANY NAME, YOUR COMPANY URL</VendorDescription>
+  </AddIn>
+</RevitAddIns>
