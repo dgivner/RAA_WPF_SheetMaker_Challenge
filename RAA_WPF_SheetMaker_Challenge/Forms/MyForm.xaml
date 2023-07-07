@@ -30,7 +30,7 @@
                 <DataGridTextColumn x:Name="SheetNumberItem" Header="Sheet Number" Width="100" IsReadOnly="False" Binding="{Binding SheetNumber }"/>
                 <DataGridTextColumn x:Name="SheetNameItem" Header="Sheet Name" Width="300" IsReadOnly="False" Binding="{Binding SheetName}"/>
                 <DataGridCheckBoxColumn Header="Is Placeholder?" Width="90" IsReadOnly="False"  Binding="{Binding IsPlaceholder}"/>
-                <DataGridComboBoxColumn x:Name="TitleBlockItem" Header="Titleblock" IsReadOnly="False" Width="100" SelectedItemBinding="{Binding TitleBlockList}" />
+                <DataGridComboBoxColumn x:Name="TitleBlockItem" Header="Titleblock" IsReadOnly="False" Width="100" SelectedItemBinding= "{Binding TBlockId}" DisplayMemberPath="Name" />
                 <DataGridComboBoxColumn x:Name="ViewItem" Header="View to Place on Sheet" Width="*" IsReadOnly="False" SelectedItemBinding="{Binding ViewToPlace}"/>
             </DataGrid.Columns>
         </DataGrid>

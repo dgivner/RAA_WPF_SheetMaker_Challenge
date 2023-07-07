@@ -10,6 +10,5 @@ namespace RAA_WPF_SheetMaker_Challenge
     {
         internal string Name;
         internal string Number;
-
     }
 }

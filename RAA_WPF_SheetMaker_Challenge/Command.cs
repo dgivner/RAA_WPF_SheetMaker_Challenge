@@ -7,6 +7,7 @@ using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 
 #endregion
@@ -32,14 +33,13 @@ namespace RAA_WPF_SheetMaker_Challenge
             Document doc = uidoc.Document;
 
             // put any code needed for the form here
-            List<DataClass1> dataList = new List<DataClass1>();
-            dataList.Add(new DataClass1(sheetNumber,sheetName,false, viewPlanList, tBlockId));
+            FilteredElementCollector tblockCollector = new FilteredElementCollector(doc);
+            tblockCollector.OfCategory(BuiltInCategory.OST_TitleBlocks);
+            tblockCollector.WhereElementIsElementType();
 
-            List<string> viewNames = MyForm.GetViewPlansByName(doc);
-            List<string> tBlockNames = MyForm.GetTitleBlocksByName(doc);
-
+            
             // open form
-            MyForm currentForm = new MyForm(doc, dataList)
+            MyForm currentForm = new MyForm(tblockCollector.ToList(), GetViews(doc))
             {
                 Width = 800,
                 Height = 450,
@@ -59,6 +59,26 @@ namespace RAA_WPF_SheetMaker_Challenge
         {
             var method = MethodBase.GetCurrentMethod().DeclaringType?.FullName;
             return method;
+        }
+        private List<View> GetViews(Document doc)
+        {
+            List<View> returnList = new List<View>();
+
+            FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
+            viewCollector.OfCategory(BuiltInCategory.OST_Views);
+
+            FilteredElementCollector sheetCollector = new FilteredElementCollector(doc);
+            sheetCollector.OfCategory(BuiltInCategory.OST_Sheets);
+
+            foreach (View curView in viewCollector)
+            {
+                if (curView.IsTemplate == false)
+                {
+                    if (Viewport.CanAddViewToSheet(doc, sheetCollector.FirstElementId(), curView.Id) == true) ;
+                }
+            }
+
+            return returnList;
         }
     }
 }

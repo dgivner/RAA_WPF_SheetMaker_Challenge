@@ -26,60 +26,25 @@ namespace RAA_WPF_SheetMaker_Challenge
         ObservableCollection<string> SheetNumberItems { get; set; }
         ObservableCollection<string> SheetNameItems { get; set; }
         ObservableCollection<bool> IsPlaceholder { get; set; }
-        ObservableCollection<string> TitleBlockItems { get; set; }
-        ObservableCollection<string> ViewNameItems { get; set; }
+        ObservableCollection<Element> TitleBlockItems { get; set; }
+        ObservableCollection<View> ViewNameItems { get; set; }
 
 
 
-        public MyForm(Document doc, List<DataClass1> dataList)
+        public MyForm(List<Element> TblockList, List<View> ViewList)
         {
             InitializeComponent();
             DataList = new ObservableCollection<DataClass1>();
-            DataContext = this;
-            DataGrid.ItemsSource = dataList;
-            //DataGrid.ItemsSource = GetData();
-            
-            SheetNumberItems = new ObservableCollection<string>();
-            //SheetNumberItem = sheetNumber;
+            TitleBlockItems = new ObservableCollection<Element>(TblockList);
+            ViewNameItems = new ObservableCollection<View>(ViewList);
 
-            SheetNameItems = new ObservableCollection<string>();
-            //SheetNameItem = sheetName;
-
-            IsPlaceholder = new ObservableCollection<bool>();
-
-            TitleBlockItems = new ObservableCollection<string>(GetTitleBlocksByName(doc));
+            DataGrid.ItemsSource = DataList;
             TitleBlockItem.ItemsSource = TitleBlockItems;
-
-
-            ViewNameItems = new ObservableCollection<string>(GetViewPlansByName(doc));
             ViewItem.ItemsSource = ViewNameItems;
 
         }
         //Methods can be moved to a utils or collector class
-        public static List<string> GetTitleBlocksByName(Document doc)//Get Title Block by Type Name
-        {
-            List<string> tBlockNames = new List<string>();
-            FilteredElementCollector collector = new FilteredElementCollector(doc);
-            collector.OfCategory(BuiltInCategory.OST_TitleBlocks);
-            ICollection<Element> tBlocks = collector.OfClass(typeof(FamilyInstance)).ToElements();
-            foreach (Element titleBlock in tBlocks)
-            {
-                Parameter parameter = titleBlock.get_Parameter(BuiltInParameter.ALL_MODEL_TYPE_NAME);
-                if (parameter != null && parameter.HasValue)
-                    tBlockNames.Add(parameter.AsString());
-            }
-            return tBlockNames;
-        }
-        public static List<string> GetViewPlansByName(Document doc) //Get Views by View Name
-        {
-            List<string> viewNames = new List<string>();
-            FilteredElementCollector collecter = new FilteredElementCollector(doc);
-            ICollection<Element> views = collecter.OfClass(typeof(View)).ToElements();
-
-            foreach(Element view in views)
-            {viewNames.Add(view.Name);}
-            return viewNames;
-        }
+        
         //Button Events
         private void dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -104,7 +69,7 @@ namespace RAA_WPF_SheetMaker_Challenge
             }
             foreach (dSheets sheet in sheetDataList)
             {
-                DataList.Add(new DataClass1(sheet.Number, sheet.Name, false, null, null));
+                DataList.Add(new DataClass1());
             }
             GetData();
             DataGrid.ItemsSource = DataList;
@@ -113,7 +78,7 @@ namespace RAA_WPF_SheetMaker_Challenge
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
-            DataList.Add(new DataClass1(sheetNumber,sheetName,false,null,null));
+            DataList.Add(new DataClass1());
         }
 
         private void btnRemove_Click(object sender, RoutedEventArgs e)
@@ -207,23 +172,13 @@ namespace RAA_WPF_SheetMaker_Challenge
     public class DataClass1
     {
         //Defining the properties for the DataGrid - container for data
-        public string SheetNumber { get; set; }
-        public string SheetName { get; set; }
+       
         public bool IsPlaceholder { get; set; }
-        public List<ViewPlan> ViewPlanList { get; set; }
-        public ElementId TBlockId { get; set; }
+        public List<View> SelectedView { get; set; }
+        public Element TBlockId { get; set; }
         public string Name { get; internal set; }
         public string Number { get; internal set; }
 
-        public DataClass1(string sheetNumber, string sheetName, bool isPlaceholder, 
-            List<ViewPlan> viewPlanList, ElementId tBlockId)
-        {
-            SheetNumber = sheetNumber;
-            SheetName = sheetName;
-            IsPlaceholder = isPlaceholder;
-            ViewPlanList = viewPlanList;
-            TBlockId = tBlockId;
-        }
     }
     
 }
